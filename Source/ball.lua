@@ -5,6 +5,9 @@ local gfx <const> = pd.graphics
 
 class('Ball').extends(gfx.sprite)
 
+local rollDuration <const> = 1400
+local rollEase <const> = pd.easingFunctions.outCubic
+
 function Ball:init(x, y, r)
 	Ball.super.init(self)
 	self:moveTo(x, y)
@@ -20,7 +23,7 @@ function Ball:init(x, y, r)
 	self.speed = 1
 	self.directionXDelta = -1
 	self.directionYDelta = -1
-	self.inertiaAnimator = gfx.animator.new(1000, 0, 0, pd.easingFunctions.outBounce)
+	self.inertiaAnimator = gfx.animator.new(rollDuration, 0, 0, rollEase)
 end
 
 function Ball:setDirectionDelta(newXDelta, newYDelta)
@@ -33,16 +36,15 @@ function Ball:setDirectionDelta(newXDelta, newYDelta)
 end
 
 function Ball:kick(dx, dy, speed)
-	print(speed)
-	self.speed = speed
-	self.inertiaAnimator = gfx.animator.new(1000, speed, 0, pd.easingFunctions.outBounce)
+	local newSpeed = self.speed + speed
+	self.inertiaAnimator = gfx.animator.new(rollDuration, newSpeed, 0, rollEase)
 	self:setDirectionDelta(dx, dy)
 end
 
 function Ball:update()
 	Ball.super.update(self)
 	
-	-- self.speed = self.inertiaAnimator:currentValue()
+	self.speed = self.inertiaAnimator:currentValue()
 	
 	local actualX, actualY, collisions, collisionsLen = 
 		self:moveWithCollisions(
@@ -54,7 +56,7 @@ function Ball:update()
 		local col = collisions[1]
 		local normal = col['normal']
 		self:setDirectionDelta(normal.dx, normal.dy)
-		self.inertiaAnimator = gfx.animator.new(1000, self.speed, 0, pd.easingFunctions.outBounce)
+		self.inertiaAnimator = gfx.animator.new(rollDuration, self.speed, 0, rollEase)
 	end
 end
 

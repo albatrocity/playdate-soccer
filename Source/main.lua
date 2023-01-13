@@ -12,6 +12,7 @@ import "CoreLibs/math"
 
 import "ball"
 import "character"
+import "field"
 
 local gfx <const> = playdate.graphics
 local sound <const> = playdate.sound
@@ -21,6 +22,7 @@ local sound <const> = playdate.sound
 
 local playerSprite = nil
 local ball = nil
+local field = nil
 
 -- A function to set up our game environment.
 local pitchVal = 440
@@ -43,7 +45,8 @@ function initialize()
 	
 	ball = Ball(220, 180, 10)
 	ball:add()
-
+	
+	local field = Field()
 	-- We want an environment displayed behind our sprite.
 	-- There are generally two ways to do this:
 	-- 1) Use setBackgroundDrawingCallback() to draw a background image. (This is what we're doing below.)
@@ -100,17 +103,10 @@ function playdate.update()
 	if (collisionsLen ~= 0) then
 		local normal = collisions[1]['normal']
 		local move = collisions[1]['move']
-		print(move.dx)
 		local speed = math.max(math.abs(move.dx), math.abs(move.dy))
-		ball:kick(normal.dx, normal.dy, speed)
-		-- print(speed)
-		-- if speed ~= 0 then
-		-- 	ball.speed = ball.speed + speed
-		-- end
+		ball:kick(normal.dx, normal.dy, speed + playerSprite.speed)
 	end
 	
-	if playdate.buttonIsPressed(playdate.kButtonA) then
-	end
 
 	-- Call the functions below in playdate.update() to draw sprites and keep
 	-- timers updated. (We aren't using timers in this example, but in most
