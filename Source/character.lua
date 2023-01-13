@@ -21,6 +21,26 @@ function Character:getNewPosition(xDelta, yDelta)
 	return self.x + (xDelta * self.speed), self.y + (yDelta * self.speed)
 end
 
+function Character:movePlayer(xDelta, yDelta, ball)
+	local newPositionX, newPositionY = self:getNewPosition(xDelta, yDelta)
+	
+	local actualX, actualY, collisions, collisionsLen = self:moveWithCollisions( newPositionX, newPositionY )
+	if (collisionsLen ~= 0) then
+		local col = collisions[1]
+		local normal = col['normal']
+		local move =   col['move']
+		if col['other']:isa(Ball) then
+			local speed = math.max(math.abs(move.dx), math.abs(move.dy))
+			ball:kick(normal.dx, normal.dy, speed + self.speed)
+		end
+	end
+end
+
 function Character:collisionResponse(other)
-	return 'overlap'
+	if other:isa(Ball) then
+		return 'overlap'
+	end
+	if other:isa(FieldBoundary) then
+		return 'slide'
+	end
 end

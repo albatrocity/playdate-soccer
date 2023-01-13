@@ -11,8 +11,8 @@ import "CoreLibs/timer"
 import "CoreLibs/math"
 
 import "ball"
-import "character"
 import "field"
+import "character"
 
 local gfx <const> = playdate.graphics
 local sound <const> = playdate.sound
@@ -96,16 +96,8 @@ function playdate.update()
 		xDelta = -1
 	end
 	
-	local newPositionX, newPositionY = playerSprite:getNewPosition(xDelta, yDelta, overlaps)
+	playerSprite:movePlayer(xDelta, yDelta, ball)
 	
-	local actualX, actualY, collisions, collisionsLen = playerSprite:moveWithCollisions( newPositionX, newPositionY )
-	
-	if (collisionsLen ~= 0) then
-		local normal = collisions[1]['normal']
-		local move = collisions[1]['move']
-		local speed = math.max(math.abs(move.dx), math.abs(move.dy))
-		ball:kick(normal.dx, normal.dy, speed + playerSprite.speed)
-	end
 	
 
 	-- Call the functions below in playdate.update() to draw sprites and keep
