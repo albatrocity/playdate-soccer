@@ -79,24 +79,9 @@ initialize()
 -- Use this function to poll input, run game logic, and move sprites.
 
 function playdate.update()
-	local yDelta = 0
-	local xDelta = 0
-	
 
-	if playdate.buttonIsPressed( playdate.kButtonUp ) then
-		yDelta = -1
-	end
-	if playdate.buttonIsPressed( playdate.kButtonRight ) then
-		xDelta = 1
-	end
-	if playdate.buttonIsPressed( playdate.kButtonDown ) then
-		yDelta = 1
-	end
-	if playdate.buttonIsPressed( playdate.kButtonLeft ) then
-		xDelta = -1
-	end
 	
-	playerSprite:movePlayer(xDelta, yDelta, ball)
+	playerSprite:movePlayer(ball)
 	
 	
 
