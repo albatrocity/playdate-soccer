@@ -56,6 +56,7 @@ function Ball:update()
 		local col = collisions[1]
 		local normal = col['normal']
 		self:setDirectionDelta(normal.dx, normal.dy)
+		Sounds:impact(self.speed)
 		self.inertiaAnimator = gfx.animator.new(rollDuration, self.speed, 0, rollEase)
 	end
 end

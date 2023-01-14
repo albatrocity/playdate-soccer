@@ -15,7 +15,6 @@ import "field"
 import "character"
 
 local gfx <const> = playdate.graphics
-local sound <const> = playdate.sound
 
 -- Here's our player sprite declaration. We'll scope it to this file because
 -- several functions need to access it.
@@ -24,18 +23,6 @@ local playerSprite = nil
 local ball = nil
 local field = nil
 
--- A function to set up our game environment.
-local pitchVal = 440
-local filterVal = 1000
-local filter = sound.twopolefilter.new(sound.kFilterLowPass)
-local synth = sound.synth.new(sound.kWaveSawtooth)
-local snare = sound.synth.new(sound.kWaveNoise)
-local snareEnv = sound.envelope.new(0, 0.2, 0)
-local audioChan = sound.channel.new(synth)
-audioChan:addSource(synth)
-audioChan:addEffect(filter)
-snare:setADSR(0, 0.5, 0, 1)
--- snare:setFinishCallback(synth:playNote('C2')) 
 
 function initialize()
 
@@ -68,10 +55,6 @@ function initialize()
 
 end
 
--- Now we'll call the function above to configure our game.
--- After this runs (it just runs once), nearly everything will be
--- controlled by the OS calling `playdate.update()` 30 times a second.
-
 initialize()
 
 -- `playdate.update()` is the heart of every Playdate game.
@@ -81,13 +64,8 @@ initialize()
 function playdate.update()
 
 	
-	playerSprite:movePlayer(ball)
+	playerSprite:movePlayer(ball, sounds)
 	
-	
-
-	-- Call the functions below in playdate.update() to draw sprites and keep
-	-- timers updated. (We aren't using timers in this example, but in most
-	-- average-complexity games, you will.)
 
 	gfx.sprite.update()
 	playdate.timer.updateTimers()
