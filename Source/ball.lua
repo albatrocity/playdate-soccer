@@ -6,7 +6,7 @@ local gfx <const> = pd.graphics
 
 class('Ball').extends(gfx.sprite)
 
-local rollDuration <const> = 1400
+local rollDuration <const> = 2400
 local rollEase <const> = pd.easingFunctions.outCubic
 
 function Ball:init(x, y, r)
