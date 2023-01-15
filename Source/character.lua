@@ -14,7 +14,8 @@ function Character:init(x, y, r, config)
 	self:setCollideRect(0, 0, r*2, r*2)
 	-- self:setGroups(1)
 	-- self:setCollidesWithGroups(2)
-	self.baseSpeed = baseSpeed == nil and 1 or baseSpeed
+	local baseSpeed = config['baseSpeed'] == nil and 1 or config['baseSpeed']
+	self.baseSpeed = baseSpeed
 	self.speed = runSpeed * (baseSpeed == nil and 1 or baseSpeed)
 	self.jumpingAnimator = gfx.animator.new(1, 1, 2, pd.easingFunctions.outCubic)
 	self.jumpingAnimator.reverses = true
@@ -36,27 +37,28 @@ function Character:isJumping()
 	return self.jumpingAnimator:currentValue() ~= 1
 end
 
-function Character:kickBall(collision, ball)
+function Character:kickBall(collision)
 	local normal = collision['normal']
 	local move =   collision['move']
 
+
 	-- local playerRect = collision['spriteRect']
 	-- local touch = collision['touch']
+	local ball = collision['other']
 
-
-	if collision['other']:isa(Ball) and self:isJumping() == false then
+	if not self:isJumping() then
 		local kickSpeed = math.max(math.abs(move.dx), math.abs(move.dy))
 		ball:kick(normal.dx, normal.dy, kickSpeed + self.speed)
 	end
 end
 
 
-function Character:updateWithBall(ball)
+function Character:update()
 	local characterActions = {}
 	local character = self
 
 	function characterActions.move(x, y)
-		character:move(x, y, ball)
+		character:move(x, y)
 	end
 	function characterActions.jump()
 		character:jump()
@@ -74,28 +76,34 @@ function Character:updateWithBall(ball)
 	self.inputControls(character, characterActions)
 end
 
-function Character:move(x, y, ball)
+function Character:move(x, y)
 	local futureX = x == nil and self.x or x
 	local futureY = y == nil and self.y or y
 	local actualX, actualY, collisions, collisionsLen = self:moveWithCollisions(futureX, futureY)
-	self:setScale(self.jumpingAnimator:currentValue())
+	local scale = self.jumpingAnimator:currentValue()
+	self:setScale(scale)
+	local origWidth = self.width / scale
+	local rectOffset = scale == 1 and 0 or self.width / 2 / 2
+	self:setCollideRect(0 + rectOffset, 0 + rectOffset, self.width / scale, self.height / scale)
 	if (collisionsLen ~= 0) then
 		local col = collisions[1]
-		self:kickBall(col, ball)
+		if (col['other']:isa(Ball)) then
+			self:kickBall(col)
+		end
 	end
 end
 
 function Character:collisionResponse(other)
-	if other:isa(Ball) then
+	if other:isa(Ball) and self:isJumping() then
 		return 'overlap'
 	end
 	if other:isa(FieldBoundary) then
 		return 'slide'
 	end
-	if other:isa(Character) and self:isJumping() ~= true then
-		return 'slide'
-	end
-	if other:isa(Character) and self:isJumping() == true then
+	if other:isa(Character) and (other:isJumping() or self:isJumping()) then
 		return 'overlap'
+	end
+	if other:isa(Character) and not other:isJumping() then
+		return 'slide'
 	end
 end

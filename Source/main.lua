@@ -74,11 +74,6 @@ initialize()
 
 function playdate.update()
 
-
-	playerSprite:updateWithBall(ball)
-	keeper:updateWithBall(ball)
-
-
 	gfx.sprite.update()
 	playdate.timer.updateTimers()
 

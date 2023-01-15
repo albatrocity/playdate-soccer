@@ -20,7 +20,7 @@ function Ball:init(x, y, r)
 	self:setCollideRect(0, 0, r*2, r*2)
 	-- self:setGroups(2)
 	-- self:setCollidesWithGroups(1)
-	
+
 	self.speed = 1
 	self.directionXDelta = -1
 	self.directionYDelta = -1
@@ -44,24 +44,31 @@ end
 
 function Ball:update()
 	Ball.super.update(self)
-	
+
 	self.speed = self.inertiaAnimator:currentValue()
-	
-	local actualX, actualY, collisions, collisionsLen = 
+
+	local actualX, actualY, collisions, collisionsLen =
 		self:moveWithCollisions(
-			self.x + (self.directionXDelta * self.speed), 
+			self.x + (self.directionXDelta * self.speed),
 			self.y + (self.directionYDelta * self.speed)
 		)
-	
+
 	if (collisionsLen ~= 0) then
 		local col = collisions[1]
 		local normal = col['normal']
 		self:setDirectionDelta(normal.dx, normal.dy)
-		Sounds:impact(self.speed)
-		self.inertiaAnimator = gfx.animator.new(rollDuration, self.speed, 0, rollEase)
+		local other = col['other']
+		if not other:isa(Character) or (other:isa(Character) and not other:isJumping()) then
+			Sounds:impact(self.speed)
+			self.inertiaAnimator = gfx.animator.new(rollDuration, self.speed, 0, rollEase)
+		end
 	end
 end
 
 function Ball:collisionResponse(other)
+	if other:isa(Character) and other:isJumping() then
+		return 'overlap'
+	end
+
 	return 'bounce'
 end
