@@ -14,8 +14,10 @@ import "ball"
 import "field"
 import "character"
 import "utils/playerControls"
+import "utils/goalieControls"
 
-local gfx <const> = playdate.graphics
+local pd <const> = playdate
+local gfx <const> = pd.graphics
 
 -- Here's our player sprite declaration. We'll scope it to this file because
 -- several functions need to access it.
@@ -27,10 +29,15 @@ local keeper = nil
 
 
 function initialize()
+	local seg = pd.geometry.lineSegment.new(300, 20, 300, 220)
+	local keeperAnimator = gfx.animator.new(1000, seg, pd.easingFunctions.inOutCubic)
+	keeperAnimator.reverses = true
+	keeperAnimator.repeatCount = -1
 
-	playerSprite = Character(200, 120, 20, inputControls)
+	playerSprite = Character(200, 120, 20, { inputControls = inputControls })
 	playerSprite:add()
-	keeper = Character(300, 120, 10)
+	keeper = Character(300, 120, 10, { inputControls = goalieControls, animator = keeperAnimator })
+	keeper:setAnimator(keeperAnimator, true)
 	keeper:add()
 
 
@@ -69,6 +76,7 @@ function playdate.update()
 
 
 	playerSprite:updateWithBall(ball)
+	keeper:updateWithBall(ball)
 
 
 	gfx.sprite.update()

@@ -6,7 +6,7 @@ local sprintSpeed <const> = 10
 
 class('Character').extends(gfx.sprite)
 
-function Character:init(x, y, r, inputControls)
+function Character:init(x, y, r, config)
 	Character.super.init(self)
 	self:moveTo(x, y)
 	local circleImage = gfx.image.new(r*2, r*2, gfx.kColorBlack)
@@ -14,10 +14,12 @@ function Character:init(x, y, r, inputControls)
 	self:setCollideRect(0, 0, r*2, r*2)
 	-- self:setGroups(1)
 	-- self:setCollidesWithGroups(2)
-	self.speed = runSpeed
+	self.baseSpeed = baseSpeed == nil and 1 or baseSpeed
+	self.speed = runSpeed * (baseSpeed == nil and 1 or baseSpeed)
 	self.jumpingAnimator = gfx.animator.new(1, 1, 2, pd.easingFunctions.outCubic)
 	self.jumpingAnimator.reverses = true
-	self.inputControls = inputControls
+	self.inputControls = config['inputControls']
+
 end
 
 function Character:getNewPosition(xDelta, yDelta)
@@ -69,11 +71,13 @@ function Character:updateWithBall(ball)
 		return character:getNewPosition(xDelta, yDelta)
 	end
 
-	self.inputControls(characterActions)
+	self.inputControls(character, characterActions)
 end
 
 function Character:move(x, y, ball)
-	local actualX, actualY, collisions, collisionsLen = self:moveWithCollisions( x, y )
+	local futureX = x == nil and self.x or x
+	local futureY = y == nil and self.y or y
+	local actualX, actualY, collisions, collisionsLen = self:moveWithCollisions(futureX, futureY)
 	self:setScale(self.jumpingAnimator:currentValue())
 	if (collisionsLen ~= 0) then
 		local col = collisions[1]

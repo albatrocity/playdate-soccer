@@ -1,6 +1,6 @@
 local pd <const> = playdate
 
-function inputControls(characterActions)
+function inputControls(character, characterActions)
 	local yDelta = 0
 	local xDelta = 0
 
