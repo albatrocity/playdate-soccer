@@ -6,7 +6,7 @@ local sprintSpeed <const> = 10
 
 class('Character').extends(gfx.sprite)
 
-function Character:init(x, y, r)
+function Character:init(x, y, r, inputControls)
 	Character.super.init(self)
 	self:moveTo(x, y)
 	local circleImage = gfx.image.new(r*2, r*2, gfx.kColorBlack)
@@ -17,10 +17,17 @@ function Character:init(x, y, r)
 	self.speed = runSpeed
 	self.jumpingAnimator = gfx.animator.new(1, 1, 2, pd.easingFunctions.outCubic)
 	self.jumpingAnimator.reverses = true
+	self.inputControls = inputControls
 end
 
 function Character:getNewPosition(xDelta, yDelta)
 	return self.x + (xDelta * self.speed), self.y + (yDelta * self.speed)
+end
+
+function Character:jump()
+	if self:isJumping() ~= true then
+		self.jumpingAnimator:reset(350)
+	end
 end
 
 function Character:isJumping()
@@ -30,44 +37,44 @@ end
 function Character:kickBall(collision, ball)
 	local normal = collision['normal']
 	local move =   collision['move']
+
+	-- local playerRect = collision['spriteRect']
+	-- local touch = collision['touch']
+
+
 	if collision['other']:isa(Ball) and self:isJumping() == false then
 		local kickSpeed = math.max(math.abs(move.dx), math.abs(move.dy))
 		ball:kick(normal.dx, normal.dy, kickSpeed + self.speed)
 	end
 end
 
-function Character:movePlayer(ball)
-	local yDelta = 0
-	local xDelta = 0
 
+function Character:updateWithBall(ball)
+	local characterActions = {}
+	local character = self
 
-	if pd.buttonIsPressed( pd.kButtonUp ) then
-		yDelta = -1
+	function characterActions.move(x, y)
+		character:move(x, y, ball)
 	end
-	if pd.buttonIsPressed( pd.kButtonRight ) then
-		xDelta = 1
+	function characterActions.jump()
+		character:jump()
 	end
-	if pd.buttonIsPressed( pd.kButtonDown ) then
-		yDelta = 1
+	function characterActions.sprint()
+		character.speed = sprintSpeed
 	end
-	if pd.buttonIsPressed( pd.kButtonLeft ) then
-		xDelta = -1
+	function characterActions.run()
+		character.speed = runSpeed
+	end
+	function characterActions.getNewPosition(xDelta, yDelta)
+		return character:getNewPosition(xDelta, yDelta)
 	end
 
-	if pd.buttonIsPressed( pd.kButtonB ) then
-		self.speed = sprintSpeed
-	else 
-		self.speed = runSpeed
-	end
-	
-	if pd.buttonJustPressed(pd.kButtonA) and self.jumpingAnimator:currentValue() == 1 then
-		self.jumpingAnimator:reset(350)
-	end	
-	
+	self.inputControls(characterActions)
+end
+
+function Character:move(x, y, ball)
+	local actualX, actualY, collisions, collisionsLen = self:moveWithCollisions( x, y )
 	self:setScale(self.jumpingAnimator:currentValue())
-	local newPositionX, newPositionY = self:getNewPosition(xDelta, yDelta)
-	
-	local actualX, actualY, collisions, collisionsLen = self:moveWithCollisions( newPositionX, newPositionY )
 	if (collisionsLen ~= 0) then
 		local col = collisions[1]
 		self:kickBall(col, ball)
@@ -80,5 +87,11 @@ function Character:collisionResponse(other)
 	end
 	if other:isa(FieldBoundary) then
 		return 'slide'
+	end
+	if other:isa(Character) and self:isJumping() ~= true then
+		return 'slide'
+	end
+	if other:isa(Character) and self:isJumping() == true then
+		return 'overlap'
 	end
 end

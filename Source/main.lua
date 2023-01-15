@@ -13,6 +13,7 @@ import "CoreLibs/math"
 import "ball"
 import "field"
 import "character"
+import "utils/playerControls"
 
 local gfx <const> = playdate.graphics
 
@@ -22,17 +23,20 @@ local gfx <const> = playdate.graphics
 local playerSprite = nil
 local ball = nil
 local field = nil
+local keeper = nil
 
 
 function initialize()
 
-	playerSprite = Character(200, 120, 20)
+	playerSprite = Character(200, 120, 20, inputControls)
 	playerSprite:add()
-	
-	
+	keeper = Character(300, 120, 10)
+	keeper:add()
+
+
 	ball = Ball(220, 180, 10)
 	ball:add()
-	
+
 	local field = Field()
 	-- We want an environment displayed behind our sprite.
 	-- There are generally two ways to do this:
@@ -43,8 +47,8 @@ function initialize()
 
 -- 	local backgroundImage = gfx.image.new( "Images/background" )
 -- 	assert( backgroundImage )
--- 	
--- 
+--
+--
 -- 	gfx.sprite.setBackgroundDrawingCallback(
 -- 		function( x, y, width, height )
 -- 			-- x,y,width,height is the updated area in sprite-local coordinates
@@ -63,9 +67,9 @@ initialize()
 
 function playdate.update()
 
-	
-	playerSprite:movePlayer(ball, sounds)
-	
+
+	playerSprite:updateWithBall(ball)
+
 
 	gfx.sprite.update()
 	playdate.timer.updateTimers()
