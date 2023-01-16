@@ -2,7 +2,7 @@ local pd <const> = playdate
 local gfx <const> = pd.graphics
 
 local runSpeed <const> = 5
-local sprintSpeed <const> = 10
+local sprintSpeed <const> = 12
 
 class('Character').extends(gfx.sprite)
 
@@ -47,8 +47,7 @@ function Character:kickBall(collision)
 	local ball = collision['other']
 
 	if not self:isJumping() then
-		local kickSpeed = math.max(math.abs(move.dx), math.abs(move.dy))
-		ball:kick(normal.dx, normal.dy, kickSpeed + self.speed)
+		ball:kick(normal.dx, normal.dy, self.speed)
 	end
 end
 

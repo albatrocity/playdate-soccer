@@ -37,8 +37,7 @@ function Ball:setDirectionDelta(newXDelta, newYDelta)
 end
 
 function Ball:kick(dx, dy, speed)
-	local newSpeed = self.speed + speed
-	self.inertiaAnimator = gfx.animator.new(rollDuration, newSpeed, 0, rollEase)
+	self.inertiaAnimator = gfx.animator.new(rollDuration, speed, 0, rollEase)
 	self:setDirectionDelta(dx, dy)
 end
 
